@@ -1,0 +1,141 @@
+--- a/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php
++++ b/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php
+@@ -28,6 +28,30 @@
+         if (isset($this->configCache[$area])) {
+             return $this->configCache[$area];
+         }
++        if ($area != 'global'
++            && key_exists('global', $this->configCache)
++            && $this->getIsAutoloadOptimizationEnabled()
++            && in_array($area,$this->getAutoloadOptimizationAreaAllowed())
++        ) {
++            $diffFile = '__'.$area.'_global_diff';
++            if (!file_exists(self::getFilePath($diffFile))) {
++                $diConfiguration = include(self::getFilePath($area));
++                $this->configCache[$area] = $diConfiguration;
++                $diff = $this->getDiff($this->configCache[$area], $this->configCache['global']);
++                if (!empty($diff) && is_array($diff)) {
++                    $string = var_export($diff, true);
++                    $content = '<?php return ' . $string . ';';
++                    file_put_contents(self::getFilePath($diffFile), $content);
++                }
++                return $this->configCache[$area];
++            } else {
++                $diff = include(self::getFilePath($diffFile));
++                if (!empty($diff)) {
++                    $this->configCache[$area] = array_replace_recursive($this->configCache['global'], $diff);
++                    return $this->configCache[$area];
++                }
++            }
++        }
+         $diConfiguration = include(self::getFilePath($area));
+         $this->configCache[$area] = $diConfiguration;
+         return $this->configCache[$area];
+@@ -44,4 +68,107 @@
+         $diPath = DirectoryList::getDefaultConfig()[DirectoryList::GENERATED_METADATA][DirectoryList::PATH];
+         return BP . '/' . $diPath . '/' . $area . '.php';
+     }
++
++    /**
++     * Get Array diff
++     *
++     * @param $array1
++     * @param $array2
++     *
++     * @return int|array
++     */
++    function getDiff($array1, $array2)
++    {
++        foreach ($array1 as $key => $value) {
++            if (is_array($value)) {
++                if (!isset($array2[$key])) {
++                    $difference[$key] = $value;
++                } elseif (!is_array($array2[$key])) {
++                    $difference[$key] = $value;
++                } else {
++                    $new_diff = $this->getDiff($value, $array2[$key]);
++                    if ($new_diff != false) {
++                        $difference[$key] = $new_diff;
++                    }
++                }
++            } elseif (!isset($array2[$key]) || $array2[$key] != $value) {
++                if (!empty($value)) {
++                    $difference[$key] = $value;
++                }
++            }
++        }
++        return !isset($difference) ? 0 : $difference;
++
++    }
++
++    /**
++     * Get Env config
++     *
++     * @return array
++     */
++    protected function getConfigFile()
++    {
++        if (empty($this->envConfig)) {
++            $this->envConfig = [];
++            $configFilePath = BP . '/' . DirectoryList::getDefaultConfig()[DirectoryList::CONFIG][DirectoryList::PATH] . '/env.php';
++            $config = include($configFilePath);
++            $flag = 'monogo_autoload_optimization';
++
++            if (!empty($config)
++                && is_array($config)
++                && isset($config[$flag])
++                && is_array($config[$flag])
++            ) {
++                $this->envConfig = $config[$flag];
++            }
++        }
++        return $this->envConfig;
++    }
++
++    /**
++     * Check if optimization is enabled
++     *
++     * @return bool
++     */
++    protected function getIsAutoloadOptimizationEnabled()
++    {
++        $flag = 'enabled';
++        $config = $this->getConfigFile();
++
++        if (!empty($config)
++            && is_array($config)
++            && isset($config[$flag])
++            && $config[$flag] == 1
++        ) {
++            return true;
++        }
++        return false;
++    }
++
++    /**
++     * Get Allowed optimization Area
++     *
++     * @return array
++     */
++    protected function getAutoloadOptimizationAreaAllowed()
++    {
++        $flag = 'allowed_area';
++        $config = $this->getConfigFile();
++
++        if (!empty($config)
++            && is_array($config)
++            && isset($config[$flag])
++            && is_array($config[$flag])
++        ) {
++            return $config[$flag];
++        }
++        return [];
++    }
++
++    /**
++     * Env Config
++     *
++     * @var array
++     */
++    private $envConfig = [];
+ }
