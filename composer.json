@@ -6,7 +6,7 @@
         "cweagans/composer-patches": "^1.6"
     },
     "type": "magento2-module",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "license": "MIT",
     "keywords": ["Magento 2", "optimization", "ObjectManager"],
     "authors": [
@@ -19,7 +19,7 @@
         "composer-exit-on-patch-failure": true,
         "patches": {
             "magento/framework": {
-                "Optimize Magento ObjectManager ConfigLoader: ": "patches/composer/optimize-config-loader.diff"
+                "Optimize Magento ObjectManager ConfigLoader: ": "https://raw.githubusercontent.com/MonogoPolska/monogo-m2-optimize-object-manager/master/patches/composer/optimize-config-loader.diff"
             }
         }
     }
