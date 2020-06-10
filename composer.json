@@ -15,7 +15,6 @@
             "email": "pawel.detka@monogo.pl"
         }
     ],
-    ,
     "extra": {
         "composer-exit-on-patch-failure": true,
         "patches": {
