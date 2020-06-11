@@ -2,11 +2,11 @@
     "name": "monogo/optimize-object-manager",
     "description": "Magento 2 module to optimize Compiled ObjectManager",
     "require": {
-        "magento/framework": ">102.0.4",
+        "magento/framework": ">=102.0.4",
         "cweagans/composer-patches": "^1.6"
     },
     "type": "magento2-module",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "license": "MIT",
     "keywords": ["Magento 2", "optimization", "ObjectManager"],
     "authors": [

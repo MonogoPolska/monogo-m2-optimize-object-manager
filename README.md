@@ -1,6 +1,6 @@
 #### Magento 2 module to optimize Compiled ObjectManager.
 
-This module will work only with Magento 2.3.3 and higher
+This module will work only with Magento 2.3.4 and higher
 
 # **Important**
 This is experimental functionality, You are using it at your own risk ! 
