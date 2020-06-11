@@ -8,7 +8,50 @@ This is experimental functionality, You are using it at your own risk !
 # **Install**
 
 ### Composer
-```"monogo/optimize-object-manager```
+In perfect world, command 
+```composer require monogo/optimize-object-manager``` 
+should do the job.
+
+But in few cases, composer do not recognize patch files. 
+
+If you don't see line 
+```
+  - Applying patches for magento/framework"
+```
+
+run 
+```
+composer require cweagans/composer-patches
+```
+
+Add in your composer.json
+
+```
+"extra": {
+           "composer-exit-on-patch-failure": true,
+           "patches": {
+               "magento/framework": {
+                   "Optimize Magento ObjectManager ConfigLoader: ": "https://raw.githubusercontent.com/MonogoPolska/monogo-m2-optimize-object-manager/master/patches/composer/optimize-config-loader.diff"
+               }
+           }
+       }
+```
+
+Run 
+```
+composer install
+```
+
+You should see line 
+```
+  - Applying patches for magento/framework"
+```
+
+if not, go to vendor/magneto and remove framework directory, then re-run 
+
+```
+composer install
+```
 
 ### Magento Setup
 - Run Magento commands
@@ -40,6 +83,11 @@ add lines:
 - enabled - 0 or 1
 - allowed_area - Magento 2 area (frontend,adminhtml,crontab,webapi_rest,webapi_soap,...) . 
 
+# **Check**
+
+After installation and configuration, you should see new files in **generated/metadata** , for example:
+- __frontend_global_diff.php
+- __adminhtml_global_diff.php
   
 # **How it works**
 When you are using M2 in Production mode and **generated/metadata** directory is not empty, magento is using Compiled mode in Object Manager.
